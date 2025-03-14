@@ -1,0 +1,5 @@
+_target_: rl.config.schemas.CartPoleEnvConfig
+name: CartPole-v1
+max_steps: 500
+reward_threshold: 195.0
+max_angle: 12.0

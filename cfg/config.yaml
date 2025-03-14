@@ -1,0 +1,6 @@
+defaults:
+  - env: cartpole
+  - _self_
+
+epochs: 100
+seed: 42

@@ -12,7 +12,6 @@ logs/
 
 # Excluir archivos de configuración de entornos virtuales
 .venv/
-env/
 venv/
 
 # Excluir dependencias de Poetry y pip
@@ -27,6 +26,7 @@ checkpoints/
 results/
 runs/
 output/
+outputs/
 experiments/
 
 # Excluir archivos de configuración y bases de datos temporales
