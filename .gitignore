@@ -1,0 +1,55 @@
+# Excluir caché de Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Excluir logs
+*.log
+logs/
+**/*.log
+
+# Excluir archivos de configuración de entornos virtuales
+.venv/
+env/
+venv/
+
+# Excluir dependencias de Poetry y pip
+poetry.lock
+pip-log.txt
+
+# Excluir caché de entrenamiento y resultados de ML
+wandb/
+wandb/*
+*.ckpt
+checkpoints/
+results/
+runs/
+output/
+experiments/
+
+# Excluir archivos de configuración y bases de datos temporales
+.DS_Store
+Thumbs.db
+*.sqlite
+*.db
+*.sqlite3
+instance/
+
+# Excluir archivos de Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Excluir archivos de compilación
+build/
+dist/
+*.egg-info/
+
+# Excluir configuraciones de IDEs y editores
+.vscode/
+.idea/
+*.iml
+
+# Excluir archivos de depuración
+debug.log
+nohup.out
