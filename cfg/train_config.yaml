@@ -1,21 +1,19 @@
 defaults:
   - env: cartpole
+  - algorithm: ppo
   - _self_
 
 train:
-  epochs: 100
+  total_timesteps: 100000
   seed: 42
   buffer_size: 10000
-  batch_size: 64
   learning_rate: 0.001
   gamma: 0.99
   epsilon: 1.0
   update_frequency: 1000
   target_update_frequency: 1000
-  max_steps: 500
-
 
 buffer:
   type: "basic"
   buffer_size: 10000
-    
+  batch_size: 64
