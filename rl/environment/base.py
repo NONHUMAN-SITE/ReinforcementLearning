@@ -1,7 +1,10 @@
-class BaseEnv:
+from abc import ABC, abstractmethod
+
+class BaseEnv(ABC):
     def __init__(self):
         pass
 
+    @abstractmethod
     def reset(self):
         '''
         Returns:
@@ -9,13 +12,11 @@ class BaseEnv:
         '''
         pass
 
+    @abstractmethod
     def step(self, action):
         '''
         Returns:
-            obs, reward, terminated, truncated, info
+            next_obs, reward, terminated, truncated, info
         '''
-        pass
-    
-    def close(self):
         pass
     
