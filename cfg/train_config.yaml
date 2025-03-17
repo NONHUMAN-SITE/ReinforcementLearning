@@ -6,7 +6,6 @@ defaults:
 train:
   total_timesteps: 100000
   seed: 42
-  buffer_size: 10000
   learning_rate: 0.001
   gamma: 0.99
   epsilon: 1.0

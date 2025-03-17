@@ -1,3 +1,4 @@
 _target_: rl.config.schemas.CartPoleEnvConfig
-name: CartPole-v1
+name: cartpole
+name_version: CartPole-v1
 render_mode: rgb_array

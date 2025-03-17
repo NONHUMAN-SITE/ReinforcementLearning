@@ -1,5 +1,6 @@
 _target_: rl.config.schemas.LunarLanderEnvConfig
-name: LunarLander-v2
+name: lunarlander
+name_version: LunarLander-v2
 max_steps: 1000
 reward_threshold: 200.0
 enable_wind: false
