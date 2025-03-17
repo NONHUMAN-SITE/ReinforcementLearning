@@ -8,6 +8,7 @@ from omegaconf import MISSING
 class EnvConfig:
     _target_: str = MISSING
     name: str = MISSING
+    name_version: str = MISSING
     max_steps: int = 1000
     render_mode: str = MISSING
 
@@ -33,6 +34,7 @@ class TrainParameters:
     update_frequency: int = 1000
     target_update_frequency: int = 1000
     max_steps: int = 500
+    total_timesteps: int = 100000
 
 # Buffer Config
 @dataclass

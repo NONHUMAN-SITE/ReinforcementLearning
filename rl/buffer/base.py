@@ -22,3 +22,9 @@ class BaseBuffer(ABC):
     @abstractmethod
     def __len__(self):
         pass
+
+    def set_collate_fn(self, collate_fn):
+        self.collate_fn = collate_fn
+
+    def set_device(self, device):
+        self.device = device

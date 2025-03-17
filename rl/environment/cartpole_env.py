@@ -7,6 +7,7 @@ from rl.config.schemas import CartPoleEnvConfig
 
 class CartPoleEnv:
 
+    name              = "cartpole"
     all_envs          = ["CartPole-v1"]
     render_modes      = ["human", "rgb_array"]
     observation_space = (4,)
