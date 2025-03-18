@@ -37,8 +37,5 @@ def main(cfg: TrainConfig) -> None:
 
     algorithm.train()
 
-
-
-
 if __name__ == "__main__":
     main()

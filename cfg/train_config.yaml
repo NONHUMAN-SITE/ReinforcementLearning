@@ -11,8 +11,10 @@ train:
   epsilon: 1.0
   update_frequency: 1000
   target_update_frequency: 1000
+  validate_frequency: 1000
+  validate_episodes: 10
 
 buffer:
   type: "basic"
   buffer_size: 10000
-  batch_size: 64
+  batch_size: 32

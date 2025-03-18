@@ -1,7 +1,5 @@
-
+import torch
 import gymnasium as gym
-
-from typing import Tuple, Optional
 from rl.config.schemas import CartPoleEnvConfig
 #from rl.environment.base import BaseEnv
 
@@ -18,10 +16,18 @@ class CartPoleEnv:
         self.env = gym.make("CartPole-v1",render_mode=cfg.render_mode)
 
     def reset(self):
-        return self.env.reset()
+        state,_ = self.env.reset()
+        return torch.tensor(state, dtype=torch.float32).unsqueeze(0)
     
     def step(self, action):
-        return self.env.step(action)
+        
+        next_state, reward, done, truncated, info = self.env.step(action)
+
+        return (torch.tensor(next_state, dtype=torch.float32).unsqueeze(0),
+                reward,
+                done,
+                truncated,
+                info)
     
     def close(self):
         return self.env.close()
@@ -30,7 +36,7 @@ class CartPoleEnv:
         return self.env.render()
     
 if __name__ == "__main__":
-    env = CartPoleEnv()
+    env = gym.make("CartPole-v1")
     obs = env.reset()
     print(env.step(1))
 

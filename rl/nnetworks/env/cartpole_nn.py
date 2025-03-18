@@ -10,7 +10,8 @@ class CartPoleActorCritic(BaseActorCritic):
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.ReLU(),
-            nn.Linear(128, 2)
+            nn.Linear(128, 2),
+            nn.Softmax(dim=1)
         )
         self.critic = nn.Sequential(
             nn.Linear(4, 128),
@@ -27,11 +28,11 @@ class CartPoleActorCritic(BaseActorCritic):
     
     def act(self, state):
         action = self.actor(state)
-        return action.argmax(dim=1).item()
+        return action.argmax(dim=1).item(), action
 
     def actor_forward(self, state):
         return self.actor(state)
-    
+
     def critic_forward(self, state):
         return self.critic(state)
     

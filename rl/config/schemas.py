@@ -35,13 +35,15 @@ class TrainParameters:
     target_update_frequency: int = 1000
     max_steps: int = 500
     total_timesteps: int = 100000
+    validate_frequency: int = 100
+    validate_episodes: int = 5
 
 # Buffer Config
 @dataclass
 class BufferConfig:
     type: str = "basic"
     buffer_size: int = 10000
-    batch_size: int = 64
+    batch_size: int = 4096
 
 # Algorithm Config
 @dataclass
@@ -56,11 +58,11 @@ class PPOConfig(AlgorithmConfig):
     name: str = "ppo"
     eps_clip: float = 0.2
     entropy_coef: float = 0.01
-    vf_coef: float = 0.5
-    K_epochs: int = 5
-    N_actors: int = 1
+    vf_coef: float = 1.0
+    K_epochs: int = 15
+    N_actors: int = 4
     T_steps: int = 2048
-
+    gamma: float = 0.99
 
 # Train Config
 @dataclass
