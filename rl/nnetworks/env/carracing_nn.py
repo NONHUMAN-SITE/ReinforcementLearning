@@ -33,7 +33,9 @@ class CarRacingActorCritic(BaseActorCritic):
 
         self.actor = nn.Sequential(
             ImgEncoderCarRacing(),
-            nn.Linear(4096, 512),
+            nn.Linear(4096, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU(),
             nn.Linear(512, 5),
             nn.Softmax(dim=-1)
@@ -41,7 +43,9 @@ class CarRacingActorCritic(BaseActorCritic):
 
         self.critic = nn.Sequential(
             ImgEncoderCarRacing(),
-            nn.Linear(4096, 512),
+            nn.Linear(4096, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU(),
             nn.Linear(512, 1)
         )
@@ -68,7 +72,7 @@ class CarRacingActorCritic(BaseActorCritic):
     def act(self, state, with_value_state=False):
         with torch.no_grad():
             state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
-            state_tensor = state_tensor.permute(0, 3, 1, 2)
+            state_tensor = state_tensor.permute(0, 3, 1, 2)/255.0 # normalize to [0, 1]
             action_probs = self.actor(state_tensor)
             dist = torch.distributions.Categorical(action_probs)
             action = dist.sample()
@@ -80,11 +84,11 @@ class CarRacingActorCritic(BaseActorCritic):
                 return action.item(), logprob
 
     def actor_forward(self, state):
-        state_tensor = state.permute(0, 3, 1, 2)
+        state_tensor = state.permute(0, 3, 1, 2)/255.0 # normalize to [0, 1]
         return self.actor(state_tensor)
 
     def critic_forward(self, state):
-        state_tensor = state.permute(0, 3, 1, 2)
+        state_tensor = state.permute(0, 3, 1, 2)/255.0 # normalize to [0, 1]
         return self.critic(state_tensor)
     
     def train(self):
