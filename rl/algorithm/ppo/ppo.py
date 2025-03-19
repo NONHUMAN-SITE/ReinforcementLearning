@@ -9,6 +9,7 @@ from rl.buffer.basic_buffer import BasicBuffer
 from rl.environment.base import BaseEnv
 from rl.nnetworks.base import BaseActorCritic
 from rl.utils.logger import logger
+from omegaconf import OmegaConf
 
 class MetricsPPO:
     '''
@@ -58,32 +59,38 @@ class PPOAlgorithm:
     def train(self):
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
-
-        #wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")    
-
-        for step in tqdm(range(1,self.cfg_train.total_timesteps + 1),
+        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")    
+        
+        for step in tqdm(range(1, self.cfg_train.total_timesteps + 1),
                          total=self.cfg_train.total_timesteps,
                          desc="Training"):
             
             self.buffer.clear()
-
             self.parallel_recollect()
 
             for epoch in range(self.cfg_algorithm.K_epochs):
-
                 sample = self.buffer.sample()
-
                 loss = self.get_loss(sample)
-
                 self.model.update(loss)
             
             if step % self.cfg_train.validate_frequency == 0:
                 self.validate()
             
             if step % self.cfg_train.save_frequency == 0:
-                path = os.path.join(self.cfg_train.save_path, "ckpt", f"step_{step:06d}")
+                path = os.path.join(self.cfg_train.save_path, f"ppo-{self.env.name}")
                 os.makedirs(path, exist_ok=True)
+                
+                # Save model
                 self.model.save_model(path)
+                
+                # Convert the configurations from DictConfig to dataclass objects
+                train_cfg_obj = OmegaConf.to_object(self.cfg_train)
+                algorithm_cfg_obj = OmegaConf.to_object(self.cfg_algorithm)
+                env_cfg_obj = OmegaConf.to_object(self.env.cfg)
+                
+                train_cfg_obj.save_config(path)
+                algorithm_cfg_obj.save_config(path)
+                env_cfg_obj.save_config(path)
 
     def validate(self):
 
@@ -120,8 +127,7 @@ class PPOAlgorithm:
 
         logger.success(f"Validation: {sum(episodes_reward) / len(episodes_reward)}")
 
-        #wandb.log({"reward_validation": sum(episodes_reward) / len(episodes_reward)},step=self.global_step)
-        logger.success(f"Validation: {sum(episodes_reward) / len(episodes_reward)}")
+        wandb.log({"reward_validation": sum(episodes_reward) / len(episodes_reward)},step=self.global_step)
 
         self.global_step += 1
 
@@ -134,8 +140,7 @@ class PPOAlgorithm:
         for _ in range(self.cfg_algorithm.N_actors):
 
             state = self.env.reset()
-            
-            # Almacenamos los valores temporalmente para calcular GAE
+
             states   = []
             logprobs = []
             rewards  = []
@@ -143,7 +148,6 @@ class PPOAlgorithm:
             values   = []
             actions  = []
             
-            # Recolectamos la trayectoria
             for t in range(self.cfg_algorithm.T_steps):
 
                 action, logprob, value = self.model.act(state, with_value_state=True)
@@ -215,9 +219,7 @@ class PPOAlgorithm:
         loss = -loss.mean()
         
         return loss
-        
 
-        
     def collate_fn(self, transitions: List[tuple]):
 
         transitions  = list(zip(*transitions))
@@ -234,4 +236,14 @@ class PPOAlgorithm:
                 old_A_t.to(self.device),
                 old_V_targ.to(self.device))
 
-
+    def save_config(self, path: str):
+        '''
+        Save the configurations to a yaml file
+        '''
+        train_cfg_obj = OmegaConf.to_object(self.cfg_train)
+        algorithm_cfg_obj = OmegaConf.to_object(self.cfg_algorithm)
+        env_cfg_obj = OmegaConf.to_object(self.env.cfg)
+        
+        train_cfg_obj.save_config(path)
+        algorithm_cfg_obj.save_config(path)
+        env_cfg_obj.save_config(path)

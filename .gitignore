@@ -28,6 +28,7 @@ runs/
 output/
 outputs/
 experiments/
+local_scripts/
 
 # Excluir archivos de configuración y bases de datos temporales
 .DS_Store

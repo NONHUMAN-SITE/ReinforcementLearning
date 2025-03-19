@@ -14,6 +14,7 @@ class CartPoleEnv:
 
     def __init__(self,cfg: CartPoleEnvConfig):
         self.env = gym.make("CartPole-v1",render_mode=cfg.render_mode)
+        self.cfg = cfg
 
     def reset(self):
         state,_ = self.env.reset()

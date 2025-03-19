@@ -1,11 +1,31 @@
 from dataclasses import dataclass
 from typing import Any, Optional, List
 from omegaconf import MISSING
+import yaml
+import os
 
 
 # Environment Config
 @dataclass
-class EnvConfig:
+class BaseConfig:
+    def save_config(self, path: str):
+        """Save configuration to yaml file"""
+        # Create config directory if it doesn't exist
+        os.makedirs(path, exist_ok=True)
+        
+        # Get class name without 'Config' suffix
+        class_name = self.__class__.__name__.replace('Config', '').lower()
+        config_path = os.path.join(path, f"{class_name}_config.yaml")
+        
+        # Convert dataclass to dict
+        config_dict = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        
+        # Save to yaml
+        with open(config_path, 'w') as f:
+            yaml.dump(config_dict, f, default_flow_style=False)
+
+@dataclass
+class EnvConfig(BaseConfig):
     _target_: str = MISSING
     name: str = MISSING
     name_version: str = MISSING
@@ -16,7 +36,6 @@ class EnvConfig:
 class CartPoleEnvConfig(EnvConfig):
     render_mode: str = "human"
 
-
 @dataclass
 class LunarLanderEnvConfig(EnvConfig):
     reward_threshold: float = 200.0
@@ -25,7 +44,7 @@ class LunarLanderEnvConfig(EnvConfig):
 
 # Training Parameters
 @dataclass
-class TrainParameters:
+class TrainParameters(BaseConfig):
     epochs: int = 100
     seed: int = 42
     learning_rate: float = 0.001
@@ -41,14 +60,14 @@ class TrainParameters:
 
 # Buffer Config
 @dataclass
-class BufferConfig:
+class BufferConfig(BaseConfig):
     type: str = "basic"
     buffer_size: int = 10000
     batch_size: int = 4096
 
 # Algorithm Config
 @dataclass
-class AlgorithmConfig:
+class AlgorithmConfig(BaseConfig):
     _target_: str = MISSING
     name: str = MISSING
 
@@ -65,9 +84,10 @@ class PPOConfig(AlgorithmConfig):
     T_steps: int = 2048
     gamma: float = 0.99
     gae_lambda: float = 0.95
+
 # Train Config
 @dataclass
-class TrainConfig:
+class TrainConfig(BaseConfig):
     defaults: List[Any] = MISSING
     env: EnvConfig = MISSING
     algorithm: AlgorithmConfig = MISSING
