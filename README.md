@@ -22,6 +22,53 @@ To set up the project, follow these steps:
    poetry install
    ```
 
+## Model Evaluation
+
+To evaluate a trained model, you'll need a model directory with the following structure:
+
+```
+model_directory/
+├── algorithm_config.yaml
+├── model.pth
+├── env_config.yaml
+├── eval_config.yaml
+└── trainparameters_config.yaml
+```
+
+### Running Evaluations
+
+1. Use `eval.py` to evaluate trained models:
+
+```bash
+python eval.py
+```
+
+```python
+checkpoint_dir = "PATH/TO/CHECKPOINT"
+```
+
+⚠️ **Important Notes:**
+- Ensure the model architecture matches the original training architecture when loading the state_dict
+- Only modify environment visualization parameters in `eval_config.yaml` (e.g., `render_mode: human`)
+- Changing core environment parameters may conflict with the trained policy
+
+### Downloading Pre-trained Models
+
+We provide pre-trained models through our HuggingFace repository. Use `download_model.py` to fetch checkpoints:
+
+```bash
+python download_model.py
+```
+
+```python
+repo_id = "PATH/TO/REPO"
+```
+
+Access our collection of pre-trained models at:
+[NONHUMAN-RESEARCH RL Collection](https://huggingface.co/collections/NONHUMAN-RESEARCH/reinforcement-learning-67da3666b6f6cfc4a4b2e125)
+
+All downloaded models include the necessary configuration files for evaluation.
+
 ## Algorithms
 
 The repository includes implementations of the following RL algorithms:
@@ -42,7 +89,10 @@ The repository includes implementations of the following RL algorithms:
 
 The repository supports multiple environments for RL training:
 
-- [ ] OpenAI Gym
+- [x] Gymnasium
+   - [x] CartPole
+   - [x] BipedalWalker
+   - [x] LunarLander
 - [ ] Atari Games
 - [ ] MuJoCo
 - [ ] PyBullet
