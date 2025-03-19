@@ -26,7 +26,7 @@ To set up the project, follow these steps:
 
 The repository includes implementations of the following RL algorithms:
 
-- [ ] Proximal Policy Optimization (PPO)
+- [x] Proximal Policy Optimization (PPO)
 - [ ] Deep Q-Network (DQN)
 - [ ] Double Deep Q-Network (DDQN)
 - [ ] Advantage Actor-Critic (A2C)
