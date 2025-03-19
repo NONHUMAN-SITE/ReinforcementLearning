@@ -33,6 +33,7 @@ class BaseConfig:
         with open(config_path, 'w') as f:
             yaml.dump(config_dict, f, default_flow_style=False)
 
+# Environment Config
 @dataclass
 class EnvConfig(BaseConfig):
     _target_: str = MISSING
@@ -52,6 +53,14 @@ class LunarLanderEnvConfig(EnvConfig):
     wind_power: float = 15.0
     gravity: float = -10.0
     render_mode: str = "human"
+
+@dataclass
+class BipedalWalkerEnvConfig(EnvConfig):
+    render_mode: str = "human"
+    hardcore: bool = False
+    min_std: float = 0.1 # Is continuous action space
+    init_std: float = 0.6 # Is continuous action space
+
 
 # Training Parameters
 @dataclass

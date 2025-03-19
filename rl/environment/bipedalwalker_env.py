@@ -1,35 +1,34 @@
-from rl.config.schemas import LunarLanderEnvConfig
 import gymnasium as gym
 from rl.environment.base import BaseEnv
+from rl.config.schemas import BipedalWalkerEnvConfig
 
-class LunarLanderEnv(BaseEnv):
-
-    name              = "lunarlander"
-    all_envs          = ["LunarLander-v3"]
+class BipedalWalkerEnv(BaseEnv):
+    name              = "bipedalwalker"
+    all_envs          = ["BipedalWalker-v3"]
     render_modes      = ["human", "rgb_array"]
-    observation_space = 8
+    observation_space = 24
     action_space      = 4
     max_steps         = 1000
+    is_continuous     = True
 
-    def __init__(self, cfg: LunarLanderEnvConfig):
-        
+    def __init__(self, cfg: BipedalWalkerEnvConfig):
         self.env = gym.make(cfg.name_version,
                             render_mode=cfg.render_mode,
-                            enable_wind=cfg.enable_wind,
-                            turbulence_power=cfg.turbulence_power,
-                            wind_power=cfg.wind_power,
-                            gravity=cfg.gravity)
+                            hardcore=cfg.hardcore)
         self.cfg = cfg
+        self.min_std = cfg.min_std
+        self.init_std = cfg.init_std
 
     def reset(self):
         state, _ = self.env.reset()
         return state
-
+    
     def step(self, action):
         return self.env.step(action)
-
+    
     def close(self):
         return self.env.close()
     
     def render(self):
         return self.env.render()
+

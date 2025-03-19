@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
 class BaseEnv(ABC):
+    
+    is_continuous: bool = False
+
     def __init__(self):
         pass
 

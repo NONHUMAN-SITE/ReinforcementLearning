@@ -59,7 +59,13 @@ class PPOAlgorithm:
     def train(self):
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
-        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")    
+        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}") 
+
+        if self.env.is_continuous:
+            self.model.set_std(self.env.init_std)
+            logger.info(f"Continuous action space: Initializing std: {self.env.init_std}")
+        else:
+            logger.info(f"Discrete action space")
         
         for step in tqdm(range(1, self.cfg_train.total_timesteps + 1),
                          total=self.cfg_train.total_timesteps,
@@ -83,6 +89,15 @@ class PPOAlgorithm:
                 # Save model
                 self.model.save_model(path)
                 self.save_config(path)
+            
+            if self.env.is_continuous:
+                #Linear decay of std
+                std = max(self.env.init_std * (1 - step / self.cfg_train.total_timesteps),
+                          self.env.min_std)
+                if std < 0:
+                    raise ValueError("Std is less than 0")
+                self.model.set_std(std)
+                logger.info(f"Continuous action space: Updating std: {std}")
 
     def validate(self):
 
@@ -188,9 +203,15 @@ class PPOAlgorithm:
         old_states, old_actions, old_logprobs, old_A_t, old_V_targ = sample
 
         #CLIP LOSS
-        probs = self.model.actor_forward(old_states)
-        dist = torch.distributions.Categorical(probs)
-        new_logprobs = dist.log_prob(old_actions)
+        if self.env.is_continuous:
+            action_mean = self.model.actor_forward(old_states)
+            cov_matrix = torch.diag(self.model.action_var).unsqueeze(0)
+            dist = torch.distributions.MultivariateNormal(action_mean, cov_matrix)
+            new_logprobs = dist.log_prob(old_actions)
+        else:
+            probs = self.model.actor_forward(old_states)
+            dist = torch.distributions.Categorical(probs)
+            new_logprobs = dist.log_prob(old_actions)
 
         ratio = torch.exp(new_logprobs - old_logprobs.detach())
         clip_ratio = torch.clamp(ratio, 1 - self.cfg_algorithm.eps_clip, 1 + self.cfg_algorithm.eps_clip)

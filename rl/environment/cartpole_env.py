@@ -7,8 +7,8 @@ class CartPoleEnv(BaseEnv):
     name              = "cartpole"
     all_envs          = ["CartPole-v1"]
     render_modes      = ["human", "rgb_array"]
-    observation_space = (4,)
-    action_space      = (2,)
+    observation_space = 4
+    action_space      = 2
     max_steps         = 500
 
     def __init__(self,cfg: CartPoleEnvConfig):
