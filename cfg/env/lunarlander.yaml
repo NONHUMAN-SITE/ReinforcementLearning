@@ -2,7 +2,7 @@ _target_: rl.config.schemas.LunarLanderEnvConfig
 name: lunarlander
 name_version: LunarLander-v3
 max_steps: 1000
-render_mode: human
+render_mode: rgb_array
 enable_wind: false
 gravity: -10.0
 turbulence_power: 0.0

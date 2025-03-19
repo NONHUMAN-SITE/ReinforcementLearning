@@ -77,6 +77,11 @@ class TrainParameters(BaseConfig):
     save_frequency: int = 1000
     save_path: str = MISSING
 
+@dataclass
+class EvalParameters(BaseConfig):
+    episodes: int = 10
+    render: bool = False
+    save_path: str = MISSING
 
 # Buffer Config
 @dataclass
@@ -116,9 +121,8 @@ class TrainConfig(BaseConfig):
 
 @dataclass
 class EvalConfig(BaseConfig):
-    _target_: str = MISSING
-    name: str = MISSING
-    episodes: int = 10
-    render: bool = False
-    save_path: str = MISSING
+    defaults: List[Any] = MISSING
+    env: EnvConfig = MISSING
+    algorithm: AlgorithmConfig = MISSING
+    eval: EvalParameters = EvalParameters()
     

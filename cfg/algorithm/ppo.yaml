@@ -5,6 +5,6 @@ entropy_coef: 0.02
 vf_coef: 1.0
 K_epochs: 40
 N_actors: 8
-T_steps: 200
+T_steps: 300
 gamma: 0.99
 gae_lambda: 0.95

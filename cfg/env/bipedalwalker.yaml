@@ -1,0 +1,7 @@
+_target_: rl.config.schemas.BipedalWalkerEnvConfig
+name: bipedalwalker
+name_version: BipedalWalker-v3
+render_mode: rgb_array
+hardcore: false
+min_std: 0.15
+init_std: 0.7

@@ -258,14 +258,9 @@ class PPOAlgorithm:
         env_cfg_obj = OmegaConf.to_object(self.env.cfg)
         
         eval_config = {
-            'environment': {
-                'name': self.env.name,
-                'parameters': env_cfg_obj
-            },
-            'algorithm': {
-                'name': self.cfg_algorithm.name,
-                'parameters': algorithm_cfg_obj
-            }
+            'env': env_cfg_obj,
+            'algorithm': algorithm_cfg_obj,
+            'model': self.model.__class__.__name__
         }
         
         eval_config_path = os.path.join(path, 'eval_config.yaml')

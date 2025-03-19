@@ -1,10 +1,10 @@
 defaults:
-  - env: lunarlander
+  - env: bipedalwalker
   - algorithm: ppo
   - _self_
 
 train:
-  total_timesteps: 200
+  total_timesteps: 500
   seed: 42
   learning_rate: 0.001
   gamma: 0.99
