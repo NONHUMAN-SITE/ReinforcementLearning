@@ -1,7 +1,9 @@
 _target_: rl.config.schemas.LunarLanderEnvConfig
 name: lunarlander
-name_version: LunarLander-v2
+name_version: LunarLander-v3
 max_steps: 1000
-reward_threshold: 200.0
+render_mode: human
 enable_wind: false
 gravity: -10.0
+turbulence_power: 0.0
+wind_power: 15.0

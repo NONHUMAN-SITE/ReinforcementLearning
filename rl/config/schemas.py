@@ -14,7 +14,16 @@ class BaseConfig:
         os.makedirs(path, exist_ok=True)
         
         # Get class name without 'Config' suffix
-        class_name = self.__class__.__name__.replace('Config', '').lower()
+        if isinstance(self, EnvConfig):
+            class_name = "env"
+        elif isinstance(self, TrainParameters):
+            class_name = "trainparameters"
+        elif isinstance(self, BufferConfig):
+            class_name = "buffer"
+        elif isinstance(self, AlgorithmConfig):
+            class_name = "algorithm"
+        else:
+            class_name = self.__class__.__name__.replace('Config', '').lower()
         config_path = os.path.join(path, f"{class_name}_config.yaml")
         
         # Convert dataclass to dict
@@ -38,9 +47,11 @@ class CartPoleEnvConfig(EnvConfig):
 
 @dataclass
 class LunarLanderEnvConfig(EnvConfig):
-    reward_threshold: float = 200.0
     enable_wind: bool = False
+    turbulence_power: float = 0.0
+    wind_power: float = 15.0
     gravity: float = -10.0
+    render_mode: str = "human"
 
 # Training Parameters
 @dataclass
@@ -93,3 +104,12 @@ class TrainConfig(BaseConfig):
     algorithm: AlgorithmConfig = MISSING
     train: TrainParameters = TrainParameters()
     buffer: BufferConfig = BufferConfig()
+
+@dataclass
+class EvalConfig(BaseConfig):
+    _target_: str = MISSING
+    name: str = MISSING
+    episodes: int = 10
+    render: bool = False
+    save_path: str = MISSING
+    

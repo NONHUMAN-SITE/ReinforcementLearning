@@ -82,15 +82,7 @@ class PPOAlgorithm:
                 
                 # Save model
                 self.model.save_model(path)
-                
-                # Convert the configurations from DictConfig to dataclass objects
-                train_cfg_obj = OmegaConf.to_object(self.cfg_train)
-                algorithm_cfg_obj = OmegaConf.to_object(self.cfg_algorithm)
-                env_cfg_obj = OmegaConf.to_object(self.env.cfg)
-                
-                train_cfg_obj.save_config(path)
-                algorithm_cfg_obj.save_config(path)
-                env_cfg_obj.save_config(path)
+                self.save_config(path)
 
     def validate(self):
 
@@ -238,12 +230,28 @@ class PPOAlgorithm:
 
     def save_config(self, path: str):
         '''
-        Save the configurations to a yaml file
+        Save the configurations to yaml files
         '''
         train_cfg_obj = OmegaConf.to_object(self.cfg_train)
         algorithm_cfg_obj = OmegaConf.to_object(self.cfg_algorithm)
         env_cfg_obj = OmegaConf.to_object(self.env.cfg)
         
+        eval_config = {
+            'environment': {
+                'name': self.env.name,
+                'parameters': env_cfg_obj
+            },
+            'algorithm': {
+                'name': self.cfg_algorithm.name,
+                'parameters': algorithm_cfg_obj
+            }
+        }
+        
+        eval_config_path = os.path.join(path, 'eval_config.yaml')
+        OmegaConf.save(config=OmegaConf.create(eval_config), f=eval_config_path)
+        logger.info(f"Evaluation config saved to {eval_config_path}")
+        
+        # Guardar las configuraciones originales
         train_cfg_obj.save_config(path)
         algorithm_cfg_obj.save_config(path)
         env_cfg_obj.save_config(path)

@@ -1,9 +1,8 @@
-import torch
 import gymnasium as gym
 from rl.config.schemas import CartPoleEnvConfig
-#from rl.environment.base import BaseEnv
+from rl.environment.base import BaseEnv
 
-class CartPoleEnv:
+class CartPoleEnv(BaseEnv):
 
     name              = "cartpole"
     all_envs          = ["CartPole-v1"]
@@ -13,7 +12,8 @@ class CartPoleEnv:
     max_steps         = 500
 
     def __init__(self,cfg: CartPoleEnvConfig):
-        self.env = gym.make("CartPole-v1",render_mode=cfg.render_mode)
+        self.env = gym.make(cfg.name_version,
+                            render_mode=cfg.render_mode)
         self.cfg = cfg
 
     def reset(self):
@@ -21,7 +21,6 @@ class CartPoleEnv:
         return state
     
     def step(self, action):
-        
         return self.env.step(action)
         
     def close(self):

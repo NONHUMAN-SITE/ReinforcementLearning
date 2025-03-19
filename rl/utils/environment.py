@@ -13,7 +13,7 @@ from rl.environment.lunarlander_env import LunarLanderEnv
 from rl.buffer.basic_buffer import BasicBuffer
 from rl.algorithm.ppo.ppo import PPOAlgorithm
 from rl.nnetworks.env.cartpole_nn import CartPoleActorCritic
-
+from rl.nnetworks.env.lunarlander_nn import LunarLanderActorCritic
 def load_env(cfg: EnvConfig):
     '''
     Load the environment based on the configuration
@@ -60,8 +60,7 @@ def load_model(env_cfg: EnvConfig, algorithm_cfg: AlgorithmConfig):
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     elif env_cfg.name == "lunarlander":
         if algorithm_cfg.name == "ppo":
-            #return LunarLanderActorCritic(env_cfg, algorithm_cfg)
-            pass
+            return LunarLanderActorCritic()
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     else:

@@ -1,5 +1,5 @@
 defaults:
-  - env: cartpole
+  - env: lunarlander
   - algorithm: ppo
   - _self_
 
@@ -11,7 +11,7 @@ train:
   epsilon: 1.0
   save_frequency: 10
   validate_frequency: 10
-  validate_episodes: 30
+  validate_episodes: 5
   save_path: "/home/lperez/main/NONHUMAN/ReinforcementLearning/output"
 
 buffer:

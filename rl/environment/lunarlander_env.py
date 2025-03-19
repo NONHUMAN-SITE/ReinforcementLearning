@@ -1,17 +1,35 @@
 from rl.config.schemas import LunarLanderEnvConfig
+import gymnasium as gym
+from rl.environment.base import BaseEnv
 
+class LunarLanderEnv(BaseEnv):
 
-class LunarLanderEnv:
-    all_envs = ["LunarLander-v2"]
+    name              = "lunarlander"
+    all_envs          = ["LunarLander-v3"]
+    render_modes      = ["human", "rgb_array"]
+    observation_space = (8,)
+    action_space      = (4,)
+    max_steps         = 1000
 
     def __init__(self, cfg: LunarLanderEnvConfig):
+        
+        self.env = gym.make(cfg.name_version,
+                            render_mode=cfg.render_mode,
+                            enable_wind=cfg.enable_wind,
+                            turbulence_power=cfg.turbulence_power,
+                            wind_power=cfg.wind_power,
+                            gravity=cfg.gravity)
         self.cfg = cfg
 
     def reset(self):
-        pass
+        state, _ = self.env.reset()
+        return state
 
     def step(self, action):
-        pass
+        return self.env.step(action)
 
     def close(self):
-        pass
+        return self.env.close()
+    
+    def render(self):
+        return self.env.render()
