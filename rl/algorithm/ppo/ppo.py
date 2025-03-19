@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import wandb
@@ -30,9 +31,10 @@ class PPOAlgorithm:
                  cfg: PPOConfig):
         
         self.cfg_algorithm = cfg
-        self.mse_loss = nn.MSELoss()
+        self.mse_loss = nn.MSELoss(reduction="none")
         self.global_step = 0
         self.metrics = MetricsPPO()
+        self.gae_lambda = 0.95  # Valor típico para lambda en GAE
 
     def set_algorithm_params(self,
                              model: BaseActorCritic,
@@ -57,10 +59,11 @@ class PPOAlgorithm:
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
 
-        state = self.env.reset()        
+        #wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")    
 
         for step in tqdm(range(1,self.cfg_train.total_timesteps + 1),
-                         total=self.cfg_train.total_timesteps):
+                         total=self.cfg_train.total_timesteps,
+                         desc="Training"):
             
             self.buffer.clear()
 
@@ -76,7 +79,11 @@ class PPOAlgorithm:
             
             if step % self.cfg_train.validate_frequency == 0:
                 self.validate()
-
+            
+            if step % self.cfg_train.save_frequency == 0:
+                path = os.path.join(self.cfg_train.save_path, "ckpt", f"step_{step:06d}")
+                os.makedirs(path, exist_ok=True)
+                self.model.save_model(path)
 
     def validate(self):
 
@@ -84,21 +91,21 @@ class PPOAlgorithm:
 
         self.model.eval()
 
-        state = self.env.reset()
-
         episodes_reward = []
 
         for episode in range(self.cfg_train.validate_episodes):
 
+            state = self.env.reset()
+            
             total_reward = 0
 
             while True:
 
-                action, prob = self.model.act(state)
+                action, logprob = self.model.act(state)
+
+                self.env.render()
 
                 next_state, reward, done, truncated, info = self.env.step(action)
-
-                next_state = next_state.to(self.device)
 
                 done = done or truncated
 
@@ -113,106 +120,118 @@ class PPOAlgorithm:
 
         logger.success(f"Validation: {sum(episodes_reward) / len(episodes_reward)}")
 
+        #wandb.log({"reward_validation": sum(episodes_reward) / len(episodes_reward)},step=self.global_step)
+        logger.success(f"Validation: {sum(episodes_reward) / len(episodes_reward)}")
+
+        self.global_step += 1
+
+        self.model.train()
 
     def parallel_recollect(self):
-
         '''
-        Debemos de optimizar esto lo más posible. Las ideas de optimización son:
-
-        * Acumular estados y calcular A_t en forma tensorial.
-        * Recolectar de forma paralela usando N_actors.
+        Implementación de GAE (Generalized Advantage Estimation)
         '''
-
         for _ in range(self.cfg_algorithm.N_actors):
 
             state = self.env.reset()
-            state = state.to(self.device)
-
+            
+            # Almacenamos los valores temporalmente para calcular GAE
+            states   = []
+            logprobs = []
+            rewards  = []
+            dones    = []
+            values   = []
+            actions  = []
+            
+            # Recolectamos la trayectoria
             for t in range(self.cfg_algorithm.T_steps):
 
-                action, prob = self.model.act(state)
-
-                logprob = torch.log(prob[:,action])
-
+                action, logprob, value = self.model.act(state, with_value_state=True)
+                
                 next_state, reward, done, truncated, info = self.env.step(action)
 
-                next_state = next_state.to(self.device)
-
                 done = done or truncated
-
-                with torch.no_grad():
-
-                    next_value_state = self.model.critic_forward(next_state)
                 
-                    value_state = self.model.critic_forward(state)
-                    
-                    delta_t = reward + self.cfg_algorithm.gamma * (1 - done) * next_value_state - value_state
-                
-                A_t = 0
-
-                for l in range(self.cfg_algorithm.T_steps - t + 1):
-
-                    A_t += (self.cfg_algorithm.gamma ** l) * delta_t
-                
-                V_targ = A_t + value_state
-
-                self.buffer.add((state, logprob, A_t, V_targ))
-
+                states.append(state)
+                logprobs.append(logprob)
+                rewards.append(reward)
+                dones.append(done)
+                values.append(value)
+                actions.append(action)
                 state = next_state
-
+                
                 if done:
                     state = self.env.reset()
-                    state = state.to(self.device)
+                        
+            # Calculating GAE
+            advantages = []
+            last_advantage = 0
+            last_value = values[-1]
+            
+            for t in reversed(range(len(rewards))):
+                if dones[t]:
+                    delta = rewards[t] - values[t]
+                    last_advantage = delta
+                else:
+                    delta = rewards[t] + self.cfg_algorithm.gamma * last_value - values[t]
+                    last_advantage = delta + self.cfg_algorithm.gamma * self.gae_lambda * last_advantage
+                
+                advantages.insert(0, last_advantage)
+                last_value = values[t]
+            
+            advantages = torch.tensor(advantages, device=self.device)
+            values = torch.tensor(values, device=self.device)
 
-    def get_loss(self, sample): 
+            V_targ = advantages + values
+            
+            for t in range(self.cfg_algorithm.T_steps):
+                self.buffer.add((states[t],actions[t], logprobs[t], advantages[t], V_targ[t]))
 
-        # Esto ya esta en forma tensorial.
-        old_states, old_logprobs, old_A_t, old_V_targ = sample
+    def get_loss(self, sample):
 
-        '''
-        N: numero de acciones.
-        B: batch size.
+        old_states, old_actions, old_logprobs, old_A_t, old_V_targ = sample
 
-        Logprobs es un tensor de shape (B,N)
-        '''
+        #CLIP LOSS
+        probs = self.model.actor_forward(old_states)
+        dist = torch.distributions.Categorical(probs)
+        new_logprobs = dist.log_prob(old_actions)
 
-        probs = self.model.actor_forward(old_states)  # shape (B,N)
-        log_probs = torch.log(probs)  # shape (B,N)
+        ratio = torch.exp(new_logprobs - old_logprobs.detach())
+        clip_ratio = torch.clamp(ratio, 1 - self.cfg_algorithm.eps_clip, 1 + self.cfg_algorithm.eps_clip)
 
-        action = torch.argmax(probs, dim=1)  # shape (B,)
-        log_probs_selected = torch.gather(log_probs, 1, action.unsqueeze(1))  # shape (B,1)
+        clip_loss = torch.min(ratio * old_A_t, clip_ratio * old_A_t)
 
-        # Entropy: -sum(p_i * log(p_i))
-        # Multiply by probs to make it pointwise.
-        entropy = -torch.sum(probs * log_probs, dim=1)  # shape (B,)
 
-        ratio = torch.exp(log_probs_selected - old_logprobs.detach())  # shape (B,1)
+        #ENTROPY LOSS
+        entropy_loss = dist.entropy()
 
-        surr_obj_1 = ratio * old_A_t
+        #VALUE LOSS
+        value_states = self.model.critic_forward(old_states).squeeze()
+        value_loss = self.mse_loss(old_V_targ, value_states)
+        value_loss = value_loss
 
-        surr_obj_2 = torch.clamp(ratio, 1 - self.cfg_algorithm.eps_clip, 1 + self.cfg_algorithm.eps_clip) * old_A_t
-
-        surr_obj = torch.min(surr_obj_1, surr_obj_2)
-
-        #VF LOSS
-        vf_loss = self.mse_loss(self.model.critic_forward(old_states), old_V_targ)
-
-        loss_total = surr_obj - self.cfg_algorithm.vf_coef * vf_loss + self.cfg_algorithm.entropy_coef * entropy
-
-        #Negative loss because we want to maximize the loss.
-        loss = -loss_total.mean()
-
+        #TOTAL LOSS
+        loss = clip_loss - self.cfg_algorithm.vf_coef * value_loss + self.cfg_algorithm.entropy_coef * entropy_loss
+        loss = -loss.mean()
+        
         return loss
+        
+
         
     def collate_fn(self, transitions: List[tuple]):
 
         transitions  = list(zip(*transitions))
 
-        old_states   = torch.stack(transitions[0], dim=0).squeeze(1)
-        old_logprobs = torch.stack(transitions[1], dim=0).squeeze(1)
-        old_A_t      = torch.stack(transitions[2], dim=0).squeeze(1)
-        old_V_targ   = torch.stack(transitions[3], dim=0).squeeze(1)
+        old_states   = torch.stack([torch.tensor(transition, dtype=torch.float32) for transition in transitions[0]], dim=0).squeeze()
+        old_actions  = torch.stack([torch.tensor(transition, dtype=torch.float32) for transition in transitions[1]], dim=0).squeeze()
+        old_logprobs = torch.stack(transitions[2], dim=0).squeeze()
+        old_A_t      = torch.stack(transitions[3], dim=0).squeeze()
+        old_V_targ   = torch.stack(transitions[4], dim=0).squeeze()
 
-        return old_states, old_logprobs, old_A_t, old_V_targ
+        return (old_states.to(self.device),
+                old_actions.to(self.device),
+                old_logprobs.to(self.device),
+                old_A_t.to(self.device),
+                old_V_targ.to(self.device))
 
 

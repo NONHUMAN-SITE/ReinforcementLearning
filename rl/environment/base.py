@@ -29,3 +29,7 @@ class BaseEnv(ABC):
         '''
         pass
     
+    @abstractmethod
+    def render(self):
+        pass
+    

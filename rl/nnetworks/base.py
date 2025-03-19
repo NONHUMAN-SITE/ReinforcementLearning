@@ -10,6 +10,14 @@ class BaseNN(ABC):
         pass
     
     @abstractmethod
+    def eval(self, state):
+        pass
+    
+    @abstractmethod
+    def train(self):
+        pass
+
+    @abstractmethod
     def update(self, loss):
         pass
 

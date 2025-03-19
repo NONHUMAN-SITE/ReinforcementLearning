@@ -17,18 +17,12 @@ class CartPoleEnv:
 
     def reset(self):
         state,_ = self.env.reset()
-        return torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        return state
     
     def step(self, action):
         
-        next_state, reward, done, truncated, info = self.env.step(action)
-
-        return (torch.tensor(next_state, dtype=torch.float32).unsqueeze(0),
-                reward,
-                done,
-                truncated,
-                info)
-    
+        return self.env.step(action)
+        
     def close(self):
         return self.env.close()
     

@@ -1,9 +1,10 @@
 _target_: rl.config.schemas.PPOConfig
 name: ppo
 eps_clip: 0.2
-entropy_coef: 0.01
-vf_coef: 0.5
-K_epochs: 5
-N_actors: 1
-T_steps: 50
+entropy_coef: 0.02
+vf_coef: 1.0
+K_epochs: 40
+N_actors: 8
+T_steps: 200
 gamma: 0.99
+gae_lambda: 0.95

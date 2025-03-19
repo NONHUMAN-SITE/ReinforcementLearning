@@ -31,12 +31,13 @@ class TrainParameters:
     learning_rate: float = 0.001
     gamma: float = 0.99
     epsilon: float = 1.0
-    update_frequency: int = 1000
-    target_update_frequency: int = 1000
     max_steps: int = 500
     total_timesteps: int = 100000
     validate_frequency: int = 100
     validate_episodes: int = 5
+    save_frequency: int = 1000
+    save_path: str = MISSING
+
 
 # Buffer Config
 @dataclass
@@ -63,7 +64,7 @@ class PPOConfig(AlgorithmConfig):
     N_actors: int = 4
     T_steps: int = 2048
     gamma: float = 0.99
-
+    gae_lambda: float = 0.95
 # Train Config
 @dataclass
 class TrainConfig:
