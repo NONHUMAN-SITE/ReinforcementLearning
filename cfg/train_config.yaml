@@ -1,5 +1,5 @@
 defaults:
-  - env: bipedalwalker
+  - env: carracing
   - algorithm: ppo
   - _self_
 

@@ -61,6 +61,13 @@ class BipedalWalkerEnvConfig(EnvConfig):
     min_std: float = 0.1 # Is continuous action space
     init_std: float = 0.6 # Is continuous action space
 
+@dataclass
+class CarRacingEnvConfig(EnvConfig):
+    render_mode: str = "human"
+    continuous: bool = True
+    min_std: float = 0.1 # Is continuous action space
+    init_std: float = 0.6 # Is continuous action space
+    lap_complete_percent: float = 0.95
 
 # Training Parameters
 @dataclass
