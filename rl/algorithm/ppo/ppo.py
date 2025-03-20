@@ -38,7 +38,7 @@ class PPOAlgorithm:
         self.metrics = MetricsPPO()
         self.gae_lambda = cfg.gae_lambda
         self.best_reward = -float("inf")
-        
+
     def set_algorithm_params(self,
                              model: BaseActorCritic,
                              env: BaseEnv,
@@ -61,7 +61,7 @@ class PPOAlgorithm:
     def train(self):
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
-        #wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")
+        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")
         path = os.path.join(self.cfg_train.save_path, f"ppo-{self.env.name}") 
         os.makedirs(path, exist_ok=True)
 

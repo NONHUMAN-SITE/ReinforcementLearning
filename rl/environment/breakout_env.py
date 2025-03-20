@@ -11,7 +11,6 @@ class BreakoutEnv(BaseEnv):
     all_envs          = ["ALE/Breakout-v5"]
     render_modes      = ["human", "rgb_array"]
     observation_space = 128
-    action_space      = 4
     is_continuous     = False
 
     def __init__(self, cfg: BreakoutEnvConfig):
@@ -19,7 +18,9 @@ class BreakoutEnv(BaseEnv):
         gym.register_envs(ale_py)
         self.env = gym.make(cfg.name_version,   
                             render_mode=cfg.render_mode,
-                            obs_type=cfg.obs_type)
+                            obs_type=cfg.obs_type,
+                            full_action_space=cfg.full_action_space)
+        self.action_space = 18 if cfg.full_action_space else 4
         self.stack_frames = cfg.stack_frames
         self.stack_frames_buffer = deque(maxlen=self.stack_frames)
 
