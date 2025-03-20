@@ -14,5 +14,5 @@ python ../../train.py \
     train.validate_frequency=10 \
     train.validate_episodes=5 \
     train.seed=42 \
-    train.save_path=../../output/ppo-carracing \
+    train.save_path=../../output \
     buffer.batch_size=256
