@@ -33,7 +33,7 @@ def main():
     
     model.set_device(device)
     
-    #model.load_model(checkpoint_dir) #if you want to load the last checkpoint
+     #model.load_model(checkpoint_dir) #if you want to load the last checkpoint
     model.load_best_model(checkpoint_dir) #if you want to load the best checkpoint
 
     if env.is_continuous:

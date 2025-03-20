@@ -2,7 +2,7 @@ python ../../train.py \
     env=lunarlander \
     algorithm=ppo \
     train.total_timesteps=500 \
-    algorithm.K_epochs=40 \
+    algorithm.K_epochs=15 \
     algorithm.T_steps=300 \
     algorithm.N_actors=4 \
     algorithm.eps_clip=0.2 \
