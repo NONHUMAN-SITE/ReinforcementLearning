@@ -12,6 +12,7 @@ from rl.config.environment import (CartPoleEnvConfig,
                                    BreakoutEnvConfig)
 from rl.config.algorithms import PPOConfig
 
+
 from rl.environment.cartpole_env import CartPoleEnv
 from rl.environment.lunarlander_env import LunarLanderEnv
 from rl.environment.bipedalwalker_env import BipedalWalkerEnv
@@ -20,7 +21,7 @@ from rl.environment.breakout_env import BreakoutEnv
 
 from rl.buffer.basic_buffer import BasicBuffer
 from rl.algorithm.ppo.ppo import PPOAlgorithm
-
+from rl.nnetworks.base import BaseNN
 from rl.nnetworks.env.cartpole_nn import CartPoleActorCritic
 from rl.nnetworks.env.lunarlander_nn import LunarLanderActorCritic
 from rl.nnetworks.env.bipedalwalker_nn import BipedalWalkerActorCritic
@@ -68,7 +69,7 @@ def load_algorithm(cfg: AlgorithmConfig):
 
 
 
-def load_model(env_cfg: EnvConfig, algorithm_cfg: AlgorithmConfig):
+def load_model(env_cfg: EnvConfig, algorithm_cfg: AlgorithmConfig) -> BaseNN:
     '''
     Load the model based on the configuration
     '''

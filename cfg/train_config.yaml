@@ -9,12 +9,12 @@ train:
   learning_rate: 0.001
   gamma: 0.99
   epsilon: 1.0
-  save_frequency: 10
+  save_frequency: 10000
   validate_frequency: 10
   validate_episodes: 5
   save_path: "/home/lperez/main/NONHUMAN/ReinforcementLearning/output"
 
 buffer:
   type: "basic"
-  buffer_size: 10000
-  batch_size: 256
+  buffer_size: 1000000
+  batch_size: 512

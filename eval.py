@@ -32,7 +32,9 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     model.set_device(device)
-    model.load_model(checkpoint_dir)
+    
+    #model.load_model(checkpoint_dir) #if you want to load the last checkpoint
+    model.load_best_model(checkpoint_dir) #if you want to load the best checkpoint
 
     if env.is_continuous:
         model.set_std(env_cfg.min_std)

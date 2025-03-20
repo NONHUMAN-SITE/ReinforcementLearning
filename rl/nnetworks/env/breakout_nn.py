@@ -43,17 +43,21 @@ class BreakoutActorCritic(BaseActorCritic):
         
         self.actor = nn.Sequential(
             BreakoutImgEncoder(self.input_channels),
-            nn.Linear(1408, 256),
+            nn.Linear(1408, 1024),
             nn.ReLU(),
-            nn.Linear(256, self.action_space),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, self.action_space),
             nn.Softmax(dim=-1)
         )   
 
         self.critic = nn.Sequential(
             BreakoutImgEncoder(self.input_channels),
-            nn.Linear(1408, 256),
+            nn.Linear(1408, 1024),
             nn.ReLU(),
-            nn.Linear(256, 1)
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, 1)
         )
 
         self.optimizer = torch.optim.Adam(
@@ -102,19 +106,3 @@ class BreakoutActorCritic(BaseActorCritic):
         self.device = device
         self.actor.to(device)
         self.critic.to(device)
-    
-    def save_model(self, path):
-        torch.save(self.actor.state_dict(), join(path, "actor.pth"))
-        torch.save(self.critic.state_dict(), join(path, "critic.pth"))
-    
-    def load_model(self, path):
-        self.actor.load_state_dict(torch.load(join(path, "actor.pth")))
-        self.critic.load_state_dict(torch.load(join(path, "critic.pth")))
-
-    def save_best_model(self, path):
-        torch.save(self.actor.state_dict(), join(path, "best_actor.pth"))
-        torch.save(self.critic.state_dict(), join(path, "best_critic.pth"))
-    
-    def load_best_model(self, path):
-        self.actor.load_state_dict(torch.load(join(path, "best_actor.pth")))
-        self.critic.load_state_dict(torch.load(join(path, "best_critic.pth")))

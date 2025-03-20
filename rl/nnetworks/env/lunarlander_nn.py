@@ -76,12 +76,4 @@ class LunarLanderActorCritic(BaseActorCritic):
         self.device = device
         self.actor.to(device)
         self.critic.to(device)
-    
-    def save_model(self, path):
-        torch.save(self.actor.state_dict(), os.path.join(path, "actor.pth"))
-        torch.save(self.critic.state_dict(), os.path.join(path, "critic.pth"))
-    
-    def load_model(self, path):
-        self.actor.load_state_dict(torch.load(os.path.join(path, "actor.pth")))
-        self.critic.load_state_dict(torch.load(os.path.join(path, "critic.pth")))
 

@@ -1,4 +1,4 @@
-_target_: rl.config.schemas.CarRacingEnvConfig
+_target_: rl.config.environment.CarRacingEnvConfig
 name: carracing
 name_version: CarRacing-v3
 render_mode: rgb_array
@@ -6,4 +6,4 @@ continuous: false
 min_std: 0.15
 init_std: 0.6
 lap_complete_percent: 0.95
-stack_frames: 4
+stack_frames: 1

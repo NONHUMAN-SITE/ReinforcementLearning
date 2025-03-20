@@ -4,20 +4,18 @@ import torch.optim as optim
 from os.path import join
 from rl.nnetworks.base import BaseActorCritic
 from rl.config.environment import CarRacingEnvConfig
+
 class ImgEncoderCarRacing(nn.Module):
-    def __init__(self):
+    def __init__(self, input_channels: int = 3):
         super().__init__()
 
         self.img_encoder = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=4, stride=4),
+            nn.Conv2d(input_channels, 32, kernel_size=8, stride=4),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=1),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
             nn.ReLU(),
-            nn.Conv2d(128, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-            nn.Conv2d(64, 32, kernel_size=3, stride=1),
             nn.Flatten()
         )
     
@@ -34,23 +32,27 @@ class CarRacingActorCritic(BaseActorCritic):
                 nn.init.orthogonal_(m.weight, gain=1)
                 nn.init.constant_(m.bias, 0)
 
+        self.env_cfg = env_cfg
+
+        self.input_channels = env_cfg.stack_frames*3
+
         self.actor = nn.Sequential(
-            ImgEncoderCarRacing(),
-            nn.Linear(800, 512),
+            ImgEncoderCarRacing(self.input_channels),
+            nn.Linear(4096, 1024),
             nn.ReLU(),
-            nn.Linear(512, 256),
+            nn.Linear(1024, 512),
             nn.ReLU(),
-            nn.Linear(256, 5),
+            nn.Linear(512, 5),
             nn.Softmax(dim=-1)
         )
 
         self.critic = nn.Sequential(
-            ImgEncoderCarRacing(),
-            nn.Linear(800, 512),
+            ImgEncoderCarRacing(self.input_channels),
+            nn.Linear(4096, 1024),
             nn.ReLU(),
-            nn.Linear(512, 256),
+            nn.Linear(1024, 512),
             nn.ReLU(),
-            nn.Linear(256, 1)
+            nn.Linear(512, 1)
         )
 
         self.optimizer = optim.Adam([
@@ -60,17 +62,6 @@ class CarRacingActorCritic(BaseActorCritic):
 
         self.actor.apply(init_weights)
         self.critic.apply(init_weights)
-
-    def _create_img_encoder(self):
-        return nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=8, stride=4),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-            nn.Flatten()
-        )
 
     def act(self, state, with_value_state=False):
         with torch.no_grad():
@@ -111,22 +102,7 @@ class CarRacingActorCritic(BaseActorCritic):
         self.device = device
         self.actor.to(device)
         self.critic.to(device)
-    
-    def save_model(self, path):
-        torch.save(self.actor.state_dict(), join(path, "actor.pth"))
-        torch.save(self.critic.state_dict(), join(path, "critic.pth"))
-    
-    def load_model(self, path):
-        self.actor.load_state_dict(torch.load(join(path, "actor.pth")))
-        self.critic.load_state_dict(torch.load(join(path, "critic.pth")))
 
-    def save_best_model(self, path):
-        torch.save(self.actor.state_dict(), join(path, "best_actor.pth"))
-        torch.save(self.critic.state_dict(), join(path, "best_critic.pth"))
-    
-    def load_best_model(self, path):
-        self.actor.load_state_dict(torch.load(join(path, "best_actor.pth")))
-        self.critic.load_state_dict(torch.load(join(path, "best_critic.pth")))
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
