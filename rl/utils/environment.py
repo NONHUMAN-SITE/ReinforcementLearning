@@ -6,6 +6,7 @@ from rl.config.schemas import (EnvConfig,
                                LunarLanderEnvConfig,
                                BipedalWalkerEnvConfig,
                                CarRacingEnvConfig,
+                               BreakoutEnvConfig,
                                BufferConfig,
                                PPOConfig,
                                AlgorithmConfig,
@@ -15,6 +16,7 @@ from rl.environment.cartpole_env import CartPoleEnv
 from rl.environment.lunarlander_env import LunarLanderEnv
 from rl.environment.bipedalwalker_env import BipedalWalkerEnv
 from rl.environment.carracing_env import CarRacingEnv
+from rl.environment.breakout_env import BreakoutEnv
 
 from rl.buffer.basic_buffer import BasicBuffer
 from rl.algorithm.ppo.ppo import PPOAlgorithm
@@ -23,6 +25,7 @@ from rl.nnetworks.env.cartpole_nn import CartPoleActorCritic
 from rl.nnetworks.env.lunarlander_nn import LunarLanderActorCritic
 from rl.nnetworks.env.bipedalwalker_nn import BipedalWalkerActorCritic
 from rl.nnetworks.env.carracing_nn import CarRacingActorCritic
+from rl.nnetworks.env.breakout_nn import BreakoutActorCritic
 
 def load_env(cfg: EnvConfig):
     '''
@@ -36,6 +39,8 @@ def load_env(cfg: EnvConfig):
         return BipedalWalkerEnv(cfg)
     elif cfg.name_version in CarRacingEnv.all_envs:
         return CarRacingEnv(cfg)
+    elif cfg.name_version in BreakoutEnv.all_envs:
+        return BreakoutEnv(cfg)
     else:
         raise ValueError(f"Environment version {cfg.name_version} not found")
 
@@ -87,6 +92,11 @@ def load_model(env_cfg: EnvConfig, algorithm_cfg: AlgorithmConfig):
             return CarRacingActorCritic()
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
+    elif env_cfg.name == "breakout":
+        if algorithm_cfg.name == "ppo":
+            return BreakoutActorCritic()
+        else:
+            raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     else:
         raise ValueError(f"Model {env_cfg.name} not found")
 
@@ -97,6 +107,7 @@ def register_env(cs: ConfigStore):
     cs.store(group="env", name="lunarlander", node=LunarLanderEnvConfig, package="_target_")
     cs.store(group="env", name="bipedalwalker", node=BipedalWalkerEnvConfig, package="_target_")
     cs.store(group="env", name="carracing", node=CarRacingEnvConfig, package="_target_")
+    cs.store(group="env", name="breakout", node=BreakoutEnvConfig, package="_target_")
     cs.store(group="algorithm", name="ppo", node=PPOConfig, package="_target_")
 
 
@@ -116,6 +127,7 @@ def validate_train_config(cfg: TrainConfig):
             "rl.config.schemas.LunarLanderEnvConfig": LunarLanderEnvConfig,
             "rl.config.schemas.BipedalWalkerEnvConfig": BipedalWalkerEnvConfig,
             "rl.config.schemas.CarRacingEnvConfig": CarRacingEnvConfig,
+            "rl.config.schemas.BreakoutEnvConfig": BreakoutEnvConfig,
         }
         env_class = env_class_map.get(env_target)
         if env_class is None:

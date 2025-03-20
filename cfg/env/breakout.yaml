@@ -1,0 +1,5 @@
+_target_: rl.config.schemas.BreakoutEnvConfig
+name: breakout
+name_version: ALE/Breakout-v5
+render_mode: rgb_array
+obs_type: rgb

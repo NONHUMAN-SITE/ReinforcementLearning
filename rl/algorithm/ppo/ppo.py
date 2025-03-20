@@ -36,7 +36,7 @@ class PPOAlgorithm:
         self.global_step = 0
         self.metrics = MetricsPPO()
         self.gae_lambda = 0.95  # Valor típico para lambda en GAE
-
+        self.best_reward = -float("inf")
     def set_algorithm_params(self,
                              model: BaseActorCritic,
                              env: BaseEnv,
@@ -59,7 +59,8 @@ class PPOAlgorithm:
     def train(self):
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
-        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}") 
+        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")
+        path = os.path.join(self.cfg_train.save_path, f"ppo-{self.env.name}") 
 
         if self.env.is_continuous:
             self.model.set_std(self.env.init_std)
@@ -80,10 +81,12 @@ class PPOAlgorithm:
                 self.model.update(loss)
             
             if step % self.cfg_train.validate_frequency == 0:
-                self.validate()
+                average_reward =self.validate()
+                if average_reward > self.best_reward:
+                    self.best_reward = average_reward
+                    self.model.save_best_model(path)
             
             if step % self.cfg_train.save_frequency == 0:
-                path = os.path.join(self.cfg_train.save_path, f"ppo-{self.env.name}")
                 os.makedirs(path, exist_ok=True)
                 
                 # Save model
@@ -132,13 +135,17 @@ class PPOAlgorithm:
 
             episodes_reward.append(total_reward)
 
-        logger.success(f"Validation: {sum(episodes_reward) / len(episodes_reward)}")
+        average_reward = sum(episodes_reward) / len(episodes_reward)
 
-        wandb.log({"reward_validation": sum(episodes_reward) / len(episodes_reward)},step=self.global_step)
+        logger.success(f"Validation: {average_reward}")
+
+        wandb.log({"reward_validation": average_reward},step=self.global_step)
 
         self.global_step += 1
 
         self.model.train()
+
+        return average_reward
 
     def parallel_recollect(self):
         '''

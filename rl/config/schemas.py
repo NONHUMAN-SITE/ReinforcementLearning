@@ -69,6 +69,11 @@ class CarRacingEnvConfig(EnvConfig):
     init_std: float = 0.6 # Is continuous action space
     lap_complete_percent: float = 0.95
 
+@dataclass
+class BreakoutEnvConfig(EnvConfig):
+    render_mode: str = "human"
+    obs_type: str = "rgb"
+
 # Training Parameters
 @dataclass
 class TrainParameters(BaseConfig):

@@ -33,7 +33,13 @@ class BaseNN(ABC):
     def load_model(self, path):
         pass
 
+    @abstractmethod
+    def save_best_model(self, path):
+        pass
 
+    @abstractmethod
+    def load_best_model(self, path):
+        pass
 
 class BaseActorCritic(BaseNN):
 

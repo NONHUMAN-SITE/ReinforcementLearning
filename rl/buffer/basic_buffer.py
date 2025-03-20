@@ -43,6 +43,7 @@ class BasicBuffer(BaseBuffer):
             
         # Obtener las transiciones correspondientes a los índices
         transitions_sample = [self.buffer[i] for i in batch_indices]
+        
         return self.collate_fn(transitions_sample)
 
     def clear(self):
