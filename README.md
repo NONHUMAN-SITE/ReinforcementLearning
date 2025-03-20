@@ -93,7 +93,8 @@ The repository supports multiple environments for RL training:
    - [x] CartPole
    - [x] BipedalWalker
    - [x] LunarLander
-- [ ] Atari Games
+- [x] Atari Games
+   - [x] Breakout
 - [ ] MuJoCo
 - [ ] PyBullet
 - [ ] Unity ML-Agents
