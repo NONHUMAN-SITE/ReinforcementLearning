@@ -2,15 +2,15 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 from dataclasses import make_dataclass
 from rl.config.schemas import (EnvConfig,
-                               CartPoleEnvConfig,
-                               LunarLanderEnvConfig,
-                               BipedalWalkerEnvConfig,
-                               CarRacingEnvConfig,
-                               BreakoutEnvConfig,
                                BufferConfig,
-                               PPOConfig,
                                AlgorithmConfig,
                                TrainConfig)
+from rl.config.environment import (CartPoleEnvConfig,
+                                   LunarLanderEnvConfig,
+                                   BipedalWalkerEnvConfig,
+                                   CarRacingEnvConfig,
+                                   BreakoutEnvConfig)
+from rl.config.algorithms import PPOConfig
 
 from rl.environment.cartpole_env import CartPoleEnv
 from rl.environment.lunarlander_env import LunarLanderEnv
@@ -74,27 +74,27 @@ def load_model(env_cfg: EnvConfig, algorithm_cfg: AlgorithmConfig):
     '''
     if env_cfg.name == "cartpole":
         if algorithm_cfg.name == "ppo":
-            return CartPoleActorCritic()
+            return CartPoleActorCritic(env_cfg)
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     elif env_cfg.name == "lunarlander":
         if algorithm_cfg.name == "ppo":
-            return LunarLanderActorCritic()
+            return LunarLanderActorCritic(env_cfg)
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     elif env_cfg.name == "bipedalwalker":
         if algorithm_cfg.name == "ppo":
-            return BipedalWalkerActorCritic()
+            return BipedalWalkerActorCritic(env_cfg)
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     elif env_cfg.name == "carracing":
         if algorithm_cfg.name == "ppo":
-            return CarRacingActorCritic()
+            return CarRacingActorCritic(env_cfg)
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     elif env_cfg.name == "breakout":
         if algorithm_cfg.name == "ppo":
-            return BreakoutActorCritic()
+            return BreakoutActorCritic(env_cfg)
         else:
             raise ValueError(f"Algorithm {algorithm_cfg.name} not found")
     else:
@@ -123,11 +123,11 @@ def validate_train_config(cfg: TrainConfig):
         if env_target is None:
             raise ValueError("No provided _target_ in the environment configuration.")
         env_class_map = {
-            "rl.config.schemas.CartPoleEnvConfig": CartPoleEnvConfig,
-            "rl.config.schemas.LunarLanderEnvConfig": LunarLanderEnvConfig,
-            "rl.config.schemas.BipedalWalkerEnvConfig": BipedalWalkerEnvConfig,
-            "rl.config.schemas.CarRacingEnvConfig": CarRacingEnvConfig,
-            "rl.config.schemas.BreakoutEnvConfig": BreakoutEnvConfig,
+            "rl.config.environment.CartPoleEnvConfig": CartPoleEnvConfig,
+            "rl.config.environment.LunarLanderEnvConfig": LunarLanderEnvConfig,
+            "rl.config.environment.BipedalWalkerEnvConfig": BipedalWalkerEnvConfig,
+            "rl.config.environment.CarRacingEnvConfig": CarRacingEnvConfig,
+            "rl.config.environment.BreakoutEnvConfig": BreakoutEnvConfig,
         }
         env_class = env_class_map.get(env_target)
         if env_class is None:
@@ -138,7 +138,7 @@ def validate_train_config(cfg: TrainConfig):
         if algo_target is None:
             raise ValueError("No provided _target_ in the algorithm configuration.")
         algo_class_map = {
-            "rl.config.schemas.PPOConfig": PPOConfig,
+            "rl.config.algorithms.PPOConfig": PPOConfig,
             # Here you can add more algorithms when they are available.
         }
         algo_class = algo_class_map.get(algo_target)

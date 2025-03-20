@@ -1,4 +1,4 @@
-_target_: rl.config.schemas.LunarLanderEnvConfig
+_target_: rl.config.environment.LunarLanderEnvConfig
 name: lunarlander
 name_version: LunarLander-v3
 max_steps: 1000

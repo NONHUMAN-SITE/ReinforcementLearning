@@ -33,7 +33,7 @@ class BaseConfig:
         with open(config_path, 'w') as f:
             yaml.dump(config_dict, f, default_flow_style=False)
 
-# Environment Config
+
 @dataclass
 class EnvConfig(BaseConfig):
     _target_: str = MISSING
@@ -42,37 +42,6 @@ class EnvConfig(BaseConfig):
     max_steps: int = 1000
     render_mode: str = MISSING
 
-@dataclass
-class CartPoleEnvConfig(EnvConfig):
-    render_mode: str = "human"
-
-@dataclass
-class LunarLanderEnvConfig(EnvConfig):
-    enable_wind: bool = False
-    turbulence_power: float = 0.0
-    wind_power: float = 15.0
-    gravity: float = -10.0
-    render_mode: str = "human"
-
-@dataclass
-class BipedalWalkerEnvConfig(EnvConfig):
-    render_mode: str = "human"
-    hardcore: bool = False
-    min_std: float = 0.1 # Is continuous action space
-    init_std: float = 0.6 # Is continuous action space
-
-@dataclass
-class CarRacingEnvConfig(EnvConfig):
-    render_mode: str = "human"
-    continuous: bool = True
-    min_std: float = 0.1 # Is continuous action space
-    init_std: float = 0.6 # Is continuous action space
-    lap_complete_percent: float = 0.95
-
-@dataclass
-class BreakoutEnvConfig(EnvConfig):
-    render_mode: str = "human"
-    obs_type: str = "rgb"
 
 # Training Parameters
 @dataclass
@@ -108,19 +77,6 @@ class AlgorithmConfig(BaseConfig):
     _target_: str = MISSING
     name: str = MISSING
 
-# PPO Config
-@dataclass
-class PPOConfig(AlgorithmConfig):
-    _target_: str = "rl.config.schemas.PPOConfig"
-    name: str = "ppo"
-    eps_clip: float = 0.2
-    entropy_coef: float = 0.01
-    vf_coef: float = 1.0
-    K_epochs: int = 15
-    N_actors: int = 4
-    T_steps: int = 2048
-    gamma: float = 0.99
-    gae_lambda: float = 0.95
 
 # Train Config
 @dataclass

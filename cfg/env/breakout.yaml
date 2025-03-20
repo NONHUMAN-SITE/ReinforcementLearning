@@ -1,5 +1,7 @@
-_target_: rl.config.schemas.BreakoutEnvConfig
+_target_: rl.config.environment.BreakoutEnvConfig
 name: breakout
 name_version: ALE/Breakout-v5
 render_mode: rgb_array
-obs_type: rgb
+obs_type: grayscale
+stack_frames: 4
+full_action_space: true

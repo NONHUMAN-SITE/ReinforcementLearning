@@ -3,10 +3,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from rl.nnetworks.base import BaseActorCritic
+from rl.config.environment import LunarLanderEnvConfig
+
 
 class LunarLanderActorCritic(BaseActorCritic):
 
-    def __init__(self):
+    def __init__(self, env_cfg: LunarLanderEnvConfig = None):
         super().__init__()
         def init_weights(m):
             if isinstance(m, nn.Linear):

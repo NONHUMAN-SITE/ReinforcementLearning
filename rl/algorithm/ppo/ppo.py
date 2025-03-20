@@ -4,7 +4,8 @@ import torch.nn as nn
 import wandb
 from tqdm import tqdm
 from typing import List
-from rl.config.schemas import PPOConfig,TrainParameters
+from rl.config.algorithms import PPOConfig
+from rl.config.schemas import TrainParameters
 from rl.buffer.basic_buffer import BasicBuffer
 from rl.environment.base import BaseEnv
 from rl.nnetworks.base import BaseActorCritic
@@ -35,8 +36,9 @@ class PPOAlgorithm:
         self.mse_loss = nn.MSELoss(reduction="none")
         self.global_step = 0
         self.metrics = MetricsPPO()
-        self.gae_lambda = 0.95  # Valor típico para lambda en GAE
+        self.gae_lambda = cfg.gae_lambda
         self.best_reward = -float("inf")
+        
     def set_algorithm_params(self,
                              model: BaseActorCritic,
                              env: BaseEnv,
@@ -59,8 +61,9 @@ class PPOAlgorithm:
     def train(self):
         
         logger.success(f"Training: {self.cfg_algorithm.name} in {self.env.name}")
-        wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")
+        #wandb.init(project="PPO", name=f"{self.env.name}-{self.cfg_algorithm.name}")
         path = os.path.join(self.cfg_train.save_path, f"ppo-{self.env.name}") 
+        os.makedirs(path, exist_ok=True)
 
         if self.env.is_continuous:
             self.model.set_std(self.env.init_std)
@@ -76,9 +79,9 @@ class PPOAlgorithm:
             self.parallel_recollect()
 
             for epoch in range(self.cfg_algorithm.K_epochs):
-                sample = self.buffer.sample()
-                loss = self.get_loss(sample)
-                self.model.update(loss)
+                for sample in self.buffer:
+                    loss = self.get_loss(sample)
+                    self.model.update(loss)
             
             if step % self.cfg_train.validate_frequency == 0:
                 average_reward =self.validate()
@@ -87,7 +90,6 @@ class PPOAlgorithm:
                     self.model.save_best_model(path)
             
             if step % self.cfg_train.save_frequency == 0:
-                os.makedirs(path, exist_ok=True)
                 
                 # Save model
                 self.model.save_model(path)

@@ -8,11 +8,10 @@ class BaseBuffer(ABC):
     '''
 
     @abstractmethod
-    def sample(self, batch_size: int):
+    def add(self, transition: tuple):
         pass
 
-    @abstractmethod
-    def add(self, transition: tuple):
+    def sample(self, batch_size: int):
         pass
     
     @abstractmethod

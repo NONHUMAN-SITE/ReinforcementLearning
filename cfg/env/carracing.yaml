@@ -6,3 +6,4 @@ continuous: false
 min_std: 0.15
 init_std: 0.6
 lap_complete_percent: 0.95
+stack_frames: 4

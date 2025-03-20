@@ -1,4 +1,4 @@
-_target_: rl.config.schemas.BipedalWalkerEnvConfig
+_target_: rl.config.environment.BipedalWalkerEnvConfig
 name: bipedalwalker
 name_version: BipedalWalker-v3
 render_mode: rgb_array

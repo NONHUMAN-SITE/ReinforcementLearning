@@ -1,5 +1,5 @@
-from rl.config.schemas import LunarLanderEnvConfig
 import gymnasium as gym
+from rl.config.environment import LunarLanderEnvConfig
 from rl.environment.base import BaseEnv
 
 class LunarLanderEnv(BaseEnv):

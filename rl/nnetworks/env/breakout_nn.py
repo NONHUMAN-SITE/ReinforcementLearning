@@ -1,46 +1,58 @@
-import os
+from os.path import join
 import torch
 import torch.nn as nn
 from rl.nnetworks.base import BaseActorCritic
+from rl.config.environment import BreakoutEnvConfig
 
 class BreakoutImgEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self,input_channels: int = 4):
         super().__init__()
 
         self.img_encoder = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=8, stride=4),
+            nn.Conv2d(input_channels, 16, kernel_size=8, stride=4),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.Conv2d(16, 32, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=2),
+            nn.Conv2d(32, 16, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(128, 64, kernel_size=3, stride=2),
             nn.Flatten()
         )
     def forward(self, x):
+        '''
+        Ensure the input is in the correct format and then compute the flattened output
+        '''
         out = self.img_encoder(x)
         return out
 
 class BreakoutActorCritic(BaseActorCritic):
-    def __init__(self):
+    def __init__(self, env_cfg: BreakoutEnvConfig = None):
+
+        self.env_cfg = env_cfg
+        if self.env_cfg.full_action_space:
+            self.action_space = 18
+        else:
+            self.action_space = 4
+
+        if self.env_cfg.obs_type == "grayscale":
+            self.input_channels = self.env_cfg.stack_frames
+        else:
+            self.input_channels = self.env_cfg.stack_frames * 3
+        
+
         super().__init__()
         
         self.actor = nn.Sequential(
-            BreakoutImgEncoder(),
-            nn.Linear(960, 512),
+            BreakoutImgEncoder(self.input_channels),
+            nn.Linear(1408, 256),
             nn.ReLU(),
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Linear(256, 4),
+            nn.Linear(256, self.action_space),
             nn.Softmax(dim=-1)
         )   
 
         self.critic = nn.Sequential(
-            BreakoutImgEncoder(),
-            nn.Linear(960, 512),
+            BreakoutImgEncoder(self.input_channels),
+            nn.Linear(1408, 256),
             nn.ReLU(),
-            nn.Linear(512, 256),
-            nn.ReLU(),  
             nn.Linear(256, 1)
         )
 
@@ -92,24 +104,17 @@ class BreakoutActorCritic(BaseActorCritic):
         self.critic.to(device)
     
     def save_model(self, path):
-        torch.save(self.actor.state_dict(), os.path.join(path, "actor.pth"))
-        torch.save(self.critic.state_dict(), os.path.join(path, "critic.pth"))
+        torch.save(self.actor.state_dict(), join(path, "actor.pth"))
+        torch.save(self.critic.state_dict(), join(path, "critic.pth"))
     
     def load_model(self, path):
-        self.actor.load_state_dict(torch.load(os.path.join(path, "actor.pth")))
-        self.critic.load_state_dict(torch.load(os.path.join(path, "critic.pth")))
+        self.actor.load_state_dict(torch.load(join(path, "actor.pth")))
+        self.critic.load_state_dict(torch.load(join(path, "critic.pth")))
 
     def save_best_model(self, path):
-        torch.save(self.actor.state_dict(), os.path.join(path, "best_actor.pth"))
-        torch.save(self.critic.state_dict(), os.path.join(path, "best_critic.pth"))
+        torch.save(self.actor.state_dict(), join(path, "best_actor.pth"))
+        torch.save(self.critic.state_dict(), join(path, "best_critic.pth"))
     
     def load_best_model(self, path):
-        self.actor.load_state_dict(torch.load(os.path.join(path, "best_actor.pth")))
-        self.critic.load_state_dict(torch.load(os.path.join(path, "best_critic.pth")))
-
-if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    actor_critic = BreakoutActorCritic()
-    actor_critic.set_device(device)
-    state = torch.randn(210, 160, 3).to(device)
-    action, logprob, value = actor_critic.act(state, with_value_state=True)
+        self.actor.load_state_dict(torch.load(join(path, "best_actor.pth")))
+        self.critic.load_state_dict(torch.load(join(path, "best_critic.pth")))

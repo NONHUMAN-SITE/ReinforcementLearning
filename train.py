@@ -11,7 +11,7 @@ from rl.utils.environment import (load_env,
                                   register_env,
                                   validate_train_config)
 from rl.utils.logger import logger
-# Registramos las configuraciones
+
 cs = ConfigStore.instance()
 cs.store(name="train_schema", node=TrainConfig)
 register_env(cs)

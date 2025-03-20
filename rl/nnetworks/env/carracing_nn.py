@@ -1,9 +1,9 @@
-import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from os.path import join
 from rl.nnetworks.base import BaseActorCritic
-
+from rl.config.environment import CarRacingEnvConfig
 class ImgEncoderCarRacing(nn.Module):
     def __init__(self):
         super().__init__()
@@ -26,7 +26,7 @@ class ImgEncoderCarRacing(nn.Module):
         return out
 
 class CarRacingActorCritic(BaseActorCritic):
-    def __init__(self):
+    def __init__(self, env_cfg: CarRacingEnvConfig = None):
         super().__init__()
 
         def init_weights(m):
@@ -113,20 +113,20 @@ class CarRacingActorCritic(BaseActorCritic):
         self.critic.to(device)
     
     def save_model(self, path):
-        torch.save(self.actor.state_dict(), os.path.join(path, "actor.pth"))
-        torch.save(self.critic.state_dict(), os.path.join(path, "critic.pth"))
+        torch.save(self.actor.state_dict(), join(path, "actor.pth"))
+        torch.save(self.critic.state_dict(), join(path, "critic.pth"))
     
     def load_model(self, path):
-        self.actor.load_state_dict(torch.load(os.path.join(path, "actor.pth")))
-        self.critic.load_state_dict(torch.load(os.path.join(path, "critic.pth")))
+        self.actor.load_state_dict(torch.load(join(path, "actor.pth")))
+        self.critic.load_state_dict(torch.load(join(path, "critic.pth")))
 
     def save_best_model(self, path):
-        torch.save(self.actor.state_dict(), os.path.join(path, "best_actor.pth"))
-        torch.save(self.critic.state_dict(), os.path.join(path, "best_critic.pth"))
+        torch.save(self.actor.state_dict(), join(path, "best_actor.pth"))
+        torch.save(self.critic.state_dict(), join(path, "best_critic.pth"))
     
     def load_best_model(self, path):
-        self.actor.load_state_dict(torch.load(os.path.join(path, "best_actor.pth")))
-        self.critic.load_state_dict(torch.load(os.path.join(path, "best_critic.pth")))
+        self.actor.load_state_dict(torch.load(join(path, "best_actor.pth")))
+        self.critic.load_state_dict(torch.load(join(path, "best_critic.pth")))
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

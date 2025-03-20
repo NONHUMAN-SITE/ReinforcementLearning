@@ -2,9 +2,9 @@ import os
 import torch
 import torch.nn as nn
 from rl.nnetworks.base import BaseActorCritic
-
+from rl.config.environment import BipedalWalkerEnvConfig
 class BipedalWalkerActorCritic(BaseActorCritic):
-    def __init__(self):
+    def __init__(self, env_cfg: BipedalWalkerEnvConfig = None):
         super().__init__()
         def init_weights(m):
             if isinstance(m, nn.Linear):

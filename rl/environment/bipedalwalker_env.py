@@ -1,6 +1,6 @@
 import gymnasium as gym
 from rl.environment.base import BaseEnv
-from rl.config.schemas import BipedalWalkerEnvConfig
+from rl.config.environment import BipedalWalkerEnvConfig
 
 class BipedalWalkerEnv(BaseEnv):
     name              = "bipedalwalker"

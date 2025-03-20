@@ -1,5 +1,5 @@
 import gymnasium as gym
-from rl.config.schemas import CartPoleEnvConfig
+from rl.config.environment import CartPoleEnvConfig
 from rl.environment.base import BaseEnv
 
 class CartPoleEnv(BaseEnv):

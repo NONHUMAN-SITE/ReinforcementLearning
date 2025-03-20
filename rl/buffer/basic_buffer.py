@@ -1,5 +1,5 @@
 import random
-from typing import Callable
+from typing import Callable, Iterator
 from rl.buffer.base import BaseBuffer
 
 class BasicBuffer(BaseBuffer):
@@ -23,28 +23,35 @@ class BasicBuffer(BaseBuffer):
     def set_device(self, device):
         self.device = device
 
-    def sample(self):
-        # Si no hay índices o ya se usaron todos, crear nueva permutación
-        if not self.indices:
-            self.indices = list(range(len(self.buffer)))
-            random.shuffle(self.indices)
-            self.current_idx = 0
-        
+    def __iter__(self) -> Iterator:
+        self.indices = list(range(len(self.buffer)))
+        random.shuffle(self.indices)
+        self.current_idx = 0
+        return self
+
+    def __next__(self):
+        if self.current_idx >= len(self.buffer):
+            raise StopIteration
+
         # Tomar el siguiente batch de índices
         batch_indices = self.indices[self.current_idx:self.current_idx + self.batch_size]
         self.current_idx += self.batch_size
-        
-        # Si no hay suficientes elementos para un batch completo
+
+        # Si el último batch es más pequeño que batch_size, completar con elementos del inicio
         if len(batch_indices) < self.batch_size:
-            # Opción 1: Completar con elementos del inicio
             remaining = self.batch_size - len(batch_indices)
             batch_indices.extend(self.indices[:remaining])
-            self.current_idx = remaining
             
         # Obtener las transiciones correspondientes a los índices
         transitions_sample = [self.buffer[i] for i in batch_indices]
         
         return self.collate_fn(transitions_sample)
+
+    def shuffle(self):
+        """Mezcla los índices del buffer"""
+        self.indices = list(range(len(self.buffer)))
+        random.shuffle(self.indices)
+        self.current_idx = 0
 
     def clear(self):
         self.buffer = []

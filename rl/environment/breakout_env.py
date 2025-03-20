@@ -1,6 +1,8 @@
 import ale_py
+import numpy as np
 import gymnasium as gym
-from rl.config.schemas import BreakoutEnvConfig
+from collections import deque
+from rl.config.environment import BreakoutEnvConfig
 from rl.environment.base import BaseEnv
 
 class BreakoutEnv(BaseEnv):
@@ -18,16 +20,38 @@ class BreakoutEnv(BaseEnv):
         self.env = gym.make(cfg.name_version,   
                             render_mode=cfg.render_mode,
                             obs_type=cfg.obs_type)
+        self.stack_frames = cfg.stack_frames
+        self.stack_frames_buffer = deque(maxlen=self.stack_frames)
 
     def reset(self):
         state,_ = self.env.reset()
-        return state
+        for _ in range(self.stack_frames):
+            if self.cfg.obs_type == "grayscale":
+                state_to_buffer = state[:,:,np.newaxis]
+            else:
+                state_to_buffer = state
+            self.stack_frames_buffer.append(state_to_buffer)
+        return self._process_state(self.stack_frames_buffer)
 
     def step(self, action):
-        return self.env.step(action)
+        state, reward, done, truncated, info = self.env.step(action)
+        if self.cfg.obs_type == "grayscale":
+            state_to_buffer = state[:,:,np.newaxis]
+        else:
+            state_to_buffer = state
+        self.stack_frames_buffer.append(state_to_buffer)
+        return (self._process_state(self.stack_frames_buffer),
+                reward,
+                done,
+                truncated,
+                info)
 
     def close(self):
         return self.env.close()
 
     def render(self):
         return self.env.render()
+
+    def _process_state(self, stack_frames_buffer):
+        frames = np.concatenate(list(stack_frames_buffer), axis=-1)
+        return frames

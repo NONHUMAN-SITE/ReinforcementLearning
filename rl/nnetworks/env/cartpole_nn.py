@@ -2,10 +2,12 @@ import os
 import torch
 import torch.nn as nn
 from rl.nnetworks.base import BaseActorCritic
+from rl.config.environment import CartPoleEnvConfig
+
 
 class CartPoleActorCritic(BaseActorCritic):
 
-    def __init__(self):
+    def __init__(self, env_cfg: CartPoleEnvConfig = None):
         super().__init__()
         # Inicializar pesos con orthogonal initialization
         def init_weights(m):
