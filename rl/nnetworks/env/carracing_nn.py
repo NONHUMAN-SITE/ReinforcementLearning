@@ -57,7 +57,7 @@ class CarRacingActorCritic(BaseActorCritic):
 
         self.optimizer = optim.Adam([
             {'params': self.actor.parameters(), 'lr': 2.5e-4},
-            {'params': self.critic.parameters(), 'lr': 1e-3}
+            {'params': self.critic.parameters(), 'lr': 2.5e-4}
         ])
 
         self.actor.apply(init_weights)

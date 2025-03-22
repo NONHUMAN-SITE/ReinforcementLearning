@@ -40,7 +40,7 @@ class CartPoleActorCritic(BaseActorCritic):
         # Learning rates diferentes para actor y critic
         self.optimizer = torch.optim.Adam([
             {'params': self.actor.parameters(), 'lr': 2.5e-4},
-            {'params': self.critic.parameters(), 'lr': 1e-3}
+            {'params': self.critic.parameters(), 'lr': 2.5e-4}
         ])
     
     def act(self, state, with_value_state=False):

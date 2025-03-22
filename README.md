@@ -22,6 +22,35 @@ To set up the project, follow these steps:
    poetry install
    ```
 
+## Training
+
+To train a model, you'll need to change the cfg/train_config.yaml file to your desired settings and all the .yaml files in env/ and algorithm/ to your desired settings.
+
+Alternatively, you can use the `train.py` script to train a model passing parameters to the script.
+
+You can see some examples in scripts/ppo/train_lunarlander.sh
+
+```bash
+python ../../train.py \
+    env=lunarlander \
+    algorithm=ppo \
+    train.total_timesteps=500 \
+    algorithm.K_epochs=30 \
+    algorithm.T_steps=300 \
+    algorithm.N_actors=8 \
+    algorithm.eps_clip=0.2 \
+    algorithm.entropy_coef=0.01 \
+    algorithm.vf_coef=1.0 \
+    algorithm.gamma=0.98 \
+    algorithm.gae_lambda=0.95 \
+    train.save_frequency=10 \
+    train.validate_frequency=10 \
+    train.validate_episodes=5 \
+    train.seed=42 \
+    train.save_path=../../output \
+    buffer.batch_size=512
+```
+
 ## Model Evaluation
 
 To evaluate a trained model, you'll need a model directory with the following structure:
@@ -34,6 +63,8 @@ model_directory/
 ├── eval_config.yaml
 └── trainparameters_config.yaml
 ```
+
+This structure will be saved by the `train.py` script when the model is trained. You can see some examples in our [HuggingFace repository](https://huggingface.co/collections/NONHUMAN-RESEARCH/reinforcement-learning-67da3666b6f6cfc4a4b2e125).
 
 ### Running Evaluations
 
@@ -104,14 +135,6 @@ The repository supports multiple environments for RL training:
 - [ ] StarCraft II Learning Environment (SC2LE)
 - [ ] Habitat AI (Embodied AI)
 
-## Roadmap
-
-### Planned Features:
-- [ ] Implement TRPO and Rainbow DQN
-- [ ] Expand support for real-world robotics simulations
-- [ ] Improve training performance with distributed computing
-- [ ] Add more benchmark results and comparisons
-- [ ] Implement curriculum learning strategies
 
 ## Contributing
 

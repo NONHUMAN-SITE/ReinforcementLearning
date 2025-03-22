@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from rl.nnetworks.base import BaseActorCritic
 from rl.config.environment import LunarLanderEnvConfig
-
+from rl.utils.logger import logger
 
 class LunarLanderActorCritic(BaseActorCritic):
 
@@ -34,7 +34,7 @@ class LunarLanderActorCritic(BaseActorCritic):
 
         self.optimizer = optim.Adam([
             {'params': self.actor.parameters(), 'lr': 2.5e-4},
-            {'params': self.critic.parameters(), 'lr': 1e-3}
+            {'params': self.critic.parameters(), 'lr': 2.5e-4}
         ])
 
         self.actor.apply(init_weights)
@@ -70,10 +70,22 @@ class LunarLanderActorCritic(BaseActorCritic):
     def update(self, loss):
         self.optimizer.zero_grad()
         loss.backward()
+        #actor_grad_norm = self._get_gradient_norm(self.actor)
+        #critic_grad_norm = self._get_gradient_norm(self.critic)
+        #logger.info(f"Actor grad norm: {actor_grad_norm}, Critic grad norm: {critic_grad_norm}")
         self.optimizer.step()
     
     def set_device(self, device):
         self.device = device
         self.actor.to(device)
         self.critic.to(device)
+    
+    def _get_gradient_norm(self, model):
+        grad_norm = 0
+        for param in model.parameters():
+            if param.grad is not None:
+                param_norm = param.grad.norm(2).item()
+                grad_norm += param_norm**2
+        grad_norm = grad_norm**0.5
+        return grad_norm
 

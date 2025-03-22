@@ -5,8 +5,8 @@ python ../../train.py \
     algorithm.K_epochs=3 \
     algorithm.T_steps=128 \
     algorithm.N_actors=4 \
-    algorithm.eps_clip=0.1 \
-    algorithm.entropy_coef=0.01 \
+    algorithm.eps_clip=0.3 \
+    algorithm.entropy_coef=0.03 \
     algorithm.vf_coef=1.0 \
     algorithm.gamma=0.99 \
     algorithm.gae_lambda=0.95 \
